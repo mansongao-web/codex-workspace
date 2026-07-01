@@ -1,0 +1,19 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: catalog-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/retail_ops?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:retail}
+    password: ${DB_PASSWORD:retail123}
+  sql:
+    init:
+      mode: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

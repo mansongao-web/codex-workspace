@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>企业知识库</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --line: #d9dee7;
+      --text: #18202f;
+      --muted: #667085;
+      --primary: #2264d1;
+      --primary-dark: #184d9f;
+      --teal: #0f8c7a;
+      --amber: #b86e00;
+      --danger: #bf2c24;
+      --shadow: 0 14px 32px rgba(18, 32, 55, .08);
+      font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(135deg, rgba(34, 100, 209, .08), transparent 28%),
+        linear-gradient(315deg, rgba(15, 140, 122, .08), transparent 24%),
+        var(--bg);
+      color: var(--text);
+    }
+    header {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, .88);
+      backdrop-filter: blur(10px);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 220px; }
+    .mark {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--primary), var(--teal));
+      color: #fff;
+      font-weight: 800;
+      box-shadow: 0 8px 22px rgba(34, 100, 209, .24);
+    }
+    h1 { margin: 0; font-size: 18px; letter-spacing: 0; }
+    .status { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--amber); }
+    .dot.ok { background: var(--teal); }
+    main {
+      display: grid;
+      grid-template-columns: minmax(360px, 480px) minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px;
+      max-width: 1480px;
+      margin: 0 auto;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .panel-head h2 { margin: 0; font-size: 16px; letter-spacing: 0; }
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      padding: 10px;
+      border-bottom: 1px solid var(--line);
+      background: #fafbfc;
+    }
+    .tab {
+      height: 36px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tab.active {
+      background: #fff;
+      border-color: var(--line);
+      color: var(--primary);
+      font-weight: 700;
+    }
+    form, .workspace { padding: 18px; }
+    label { display: block; margin: 0 0 7px; font-size: 13px; color: #364153; font-weight: 650; }
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid #cbd3df;
+      border-radius: 6px;
+      padding: 10px 11px;
+      font: inherit;
+      color: var(--text);
+      background: #fff;
+      outline: none;
+    }
+    textarea { min-height: 118px; resize: vertical; line-height: 1.5; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(34, 100, 209, .12);
+    }
+    .field { margin-bottom: 14px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    button {
+      height: 38px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      padding: 0 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    button.primary {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: #fff;
+      font-weight: 700;
+    }
+    button.primary:hover { background: var(--primary-dark); }
+    button.danger { color: var(--danger); border-color: #f0b7b3; }
+    button:disabled { opacity: .56; cursor: not-allowed; }
+    .muted { color: var(--muted); font-size: 13px; }
+    .result {
+      padding: 18px;
+      min-height: 246px;
+      line-height: 1.65;
+    }
+    .answer {
+      white-space: pre-wrap;
+      background: #f7f9fc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .citation, .doc-row {
+      border-top: 1px solid var(--line);
+      padding: 12px 0;
+    }
+    .citation:first-child, .doc-row:first-child { border-top: 0; }
+    .cite-title, .doc-title { font-weight: 750; margin-bottom: 4px; }
+    .cite-meta, .doc-meta {
+      color: var(--muted);
+      font-size: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .score {
+      color: var(--teal);
+      font-weight: 700;
+    }
+    .doc-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: start;
+    }
+    .toast {
+      min-height: 32px;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
+    }
+    .toast.error { color: var(--danger); }
+    .api-key { width: min(320px, 42vw); }
+    .hidden { display: none; }
+    @media (max-width: 920px) {
+      header { padding: 0 16px; }
+      main { grid-template-columns: 1fr; padding: 12px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .api-key { width: 100%; }
+      .status { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="mark">KB</div>
+      <h1>企业知识库</h1>
+    </div>
+    <div class="status">
+      <span id="statusDot" class="dot"></span>
+      <span id="statusText">检测中</span>
+      <input id="apiKey" class="api-key" placeholder="X-KB-Api-Key">
+    </div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <div class="tabs">
+        <button class="tab active" data-tab="ask">问答</button>
+        <button class="tab" data-tab="search">检索</button>
+        <button class="tab" data-tab="document">文档</button>
+        <button class="tab" data-tab="faq">FAQ</button>
+      </div>
+
+      <form id="askTab" data-panel="ask">
+        <div class="field">
+          <label for="question">问题</label>
+          <textarea id="question">差旅住宿报销需要什么材料？</textarea>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="askTopK">召回数量</label>
+            <input id="askTopK" type="number" min="1" max="20" value="5">
+          </div>
+          <div class="field">
+            <label for="askDepartment">部门过滤</label>
+            <input id="askDepartment" placeholder="财务">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">生成回答</button>
+          <span id="askToast" class="toast"></span>
+        </div>
+      </form>
+
+      <form id="searchTab" class="hidden" data-panel="search">
+        <div class="field">
+          <label for="query">检索词</label>
+          <textarea id="query">住宿报销需要哪些材料</textarea>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="searchTopK">返回数量</label>
+            <input id="searchTopK" type="number" min="1" max="20" value="8">
+          </div>
+          <div class="field">
+            <label for="searchDepartment">部门过滤</label>
+            <input id="searchDepartment" placeholder="财务">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">语义检索</button>
+          <span id="searchToast" class="toast"></span>
+        </div>
+      </form>
+
+      <form id="documentTab" class="hidden" data-panel="document">
+        <div class="field">
+          <label for="docTitle">标题</label>
+          <input id="docTitle" value="差旅报销制度">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="docDepartment">部门</label>
+            <input id="docDepartment" value="财务">
+          </div>
+          <div class="field">
+            <label for="docCategory">分类</label>
+            <input id="docCategory" value="制度">
+          </div>
+        </div>
+        <div class="field">
+          <label for="docSource">来源 URI</label>
+          <input id="docSource" value="oa://docs/finance/travel-policy">
+        </div>
+        <div class="field">
+          <label for="docContent">正文</label>
+          <textarea id="docContent">员工差旅报销需要提交审批单、发票和行程单。住宿费按照城市等级执行标准，超标部分需部门负责人审批。</textarea>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">写入知识库</button>
+          <span id="docToast" class="toast"></span>
+        </div>
+      </form>
+
+      <form id="faqTab" class="hidden" data-panel="faq">
+        <div class="field">
+          <label for="faqQuestion">问题</label>
+          <input id="faqQuestion" value="CRM 客户资料如何查询？">
+        </div>
+        <div class="field">
+          <label for="faqAnswer">答案</label>
+          <textarea id="faqAnswer">进入 CRM 客户中心，通过客户名称、手机号或企业统一社会信用代码检索。</textarea>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="faqDepartment">部门</label>
+            <input id="faqDepartment" value="销售">
+          </div>
+          <div class="field">
+            <label for="faqSource">来源 URI</label>
+            <input id="faqSource" value="faq://crm/customer-search">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="primary" type="submit">写入 FAQ</button>
+          <span id="faqToast" class="toast"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>结果与文档库</h2>
+        <div class="actions">
+          <button id="refreshDocs" type="button">刷新文档</button>
+        </div>
+      </div>
+      <div id="result" class="result">
+        <div class="muted">当前知识库接口已就绪。</div>
+      </div>
+      <div class="panel-head">
+        <h2>已入库文档</h2>
+        <span id="docCount" class="muted">0</span>
+      </div>
+      <div id="documents" class="workspace"></div>
+    </section>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const result = $("result");
+
+    function headers() {
+      const apiKey = $("apiKey").value.trim();
+      const value = {"Content-Type": "application/json; charset=utf-8"};
+      if (apiKey) value["X-KB-Api-Key"] = apiKey;
+      return value;
+    }
+
+    async function request(path, options = {}) {
+      const response = await fetch(path, {
+        ...options,
+        headers: {...headers(), ...(options.headers || {})}
+      });
+      const text = await response.text();
+      const payload = text ? JSON.parse(text) : {};
+      if (!response.ok) throw new Error(payload.error || response.statusText);
+      return payload;
+    }
+
+    function filters(department) {
+      const value = department.trim();
+      return value ? {department: value} : {};
+    }
+
+    function setToast(id, text, isError = false) {
+      const node = $(id);
+      node.textContent = text;
+      node.classList.toggle("error", isError);
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    function renderAnswer(payload) {
+      result.innerHTML = `
+        <div class="answer">${escapeHtml(payload.answer || "")}</div>
+        ${renderCitations(payload.citations || [])}
+      `;
+    }
+
+    function renderSearch(payload) {
+      result.innerHTML = renderCitations(payload.results || []);
+    }
+
+    function renderCitations(items) {
+      if (!items.length) return `<div class="muted">没有匹配结果。</div>`;
+      return items.map(item => `
+        <div class="citation">
+          <div class="cite-title">[${item.index}] ${escapeHtml(item.title)}</div>
+          <div class="cite-meta">
+            <span>${escapeHtml(item.sourceUri)}</span>
+            <span>段落 ${item.chunkOrdinal}</span>
+            <span class="score">${Number(item.score).toFixed(3)}</span>
+          </div>
+          <div>${escapeHtml(item.snippet)}</div>
+        </div>
+      `).join("");
+    }
+
+    async function loadDocuments() {
+      try {
+        const payload = await request("/api/documents");
+        $("docCount").textContent = `${payload.count} 个`;
+        $("documents").innerHTML = payload.documents.length ? payload.documents.map(doc => `
+          <div class="doc-row">
+            <div>
+              <div class="doc-title">${escapeHtml(doc.title)}</div>
+              <div class="doc-meta">
+                <span>${escapeHtml(doc.sourceType)}</span>
+                <span>${doc.chunkCount} 段</span>
+                <span>${escapeHtml(doc.sourceUri)}</span>
+              </div>
+              <div class="muted">${escapeHtml(JSON.stringify(doc.metadata || {}))}</div>
+            </div>
+            <button class="danger" type="button" data-delete="${escapeHtml(doc.id)}">删除</button>
+          </div>
+        `).join("") : `<div class="muted">暂无文档。</div>`;
+      } catch (error) {
+        $("documents").innerHTML = `<div class="muted">${escapeHtml(error.message)}</div>`;
+      }
+    }
+
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab").forEach(item => item.classList.remove("active"));
+        document.querySelectorAll("[data-panel]").forEach(item => item.classList.add("hidden"));
+        tab.classList.add("active");
+        $(`${tab.dataset.tab}Tab`).classList.remove("hidden");
+      });
+    });
+
+    $("askTab").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setToast("askToast", "处理中");
+      try {
+        const payload = await request("/api/ask", {
+          method: "POST",
+          body: JSON.stringify({
+            question: $("question").value,
+            topK: Number($("askTopK").value),
+            filters: filters($("askDepartment").value)
+          })
+        });
+        renderAnswer(payload);
+        setToast("askToast", "完成");
+      } catch (error) {
+        setToast("askToast", error.message, true);
+      }
+    });
+
+    $("searchTab").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setToast("searchToast", "检索中");
+      try {
+        const payload = await request("/api/search", {
+          method: "POST",
+          body: JSON.stringify({
+            query: $("query").value,
+            topK: Number($("searchTopK").value),
+            filters: filters($("searchDepartment").value)
+          })
+        });
+        renderSearch(payload);
+        setToast("searchToast", "完成");
+      } catch (error) {
+        setToast("searchToast", error.message, true);
+      }
+    });
+
+    $("documentTab").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setToast("docToast", "写入中");
+      try {
+        const payload = await request("/api/documents", {
+          method: "POST",
+          body: JSON.stringify({
+            title: $("docTitle").value,
+            sourceUri: $("docSource").value,
+            sourceType: "POLICY",
+            department: $("docDepartment").value,
+            category: $("docCategory").value,
+            content: $("docContent").value
+          })
+        });
+        setToast("docToast", `已写入 ${payload.chunkCount} 个分片`);
+        await loadDocuments();
+      } catch (error) {
+        setToast("docToast", error.message, true);
+      }
+    });
+
+    $("faqTab").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      setToast("faqToast", "写入中");
+      try {
+        const payload = await request("/api/faqs", {
+          method: "POST",
+          body: JSON.stringify({
+            question: $("faqQuestion").value,
+            answer: $("faqAnswer").value,
+            sourceUri: $("faqSource").value,
+            department: $("faqDepartment").value,
+            category: "FAQ"
+          })
+        });
+        setToast("faqToast", `已写入 ${payload.chunkCount} 个分片`);
+        await loadDocuments();
+      } catch (error) {
+        setToast("faqToast", error.message, true);
+      }
+    });
+
+    $("refreshDocs").addEventListener("click", loadDocuments);
+    $("documents").addEventListener("click", async (event) => {
+      const id = event.target.dataset.delete;
+      if (!id) return;
+      event.target.disabled = true;
+      try {
+        await request(`/api/documents/${encodeURIComponent(id)}`, {method: "DELETE"});
+        await loadDocuments();
+      } catch (error) {
+        result.innerHTML = `<div class="muted">${escapeHtml(error.message)}</div>`;
+      }
+    });
+
+    async function boot() {
+      try {
+        await request("/health");
+        $("statusDot").classList.add("ok");
+        $("statusText").textContent = "服务正常";
+      } catch (error) {
+        $("statusText").textContent = "服务异常";
+      }
+      await loadDocuments();
+    }
+
+    boot();
+  </script>
+</body>
+</html>

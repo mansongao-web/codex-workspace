@@ -1,0 +1,117 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: retailops-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: retail_ops
+      MYSQL_USER: retail
+      MYSQL_PASSWORD: retail123
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      - retailops_mysql:/var/lib/mysql
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uretail", "-pretail123"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  catalog-service:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        SERVICE: catalog-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/retail_ops?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_USERNAME: retail
+      DB_PASSWORD: retail123
+    ports:
+      - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  inventory-service:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        SERVICE: inventory-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/retail_ops?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_USERNAME: retail
+      DB_PASSWORD: retail123
+    ports:
+      - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  pos-service:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        SERVICE: pos-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/retail_ops?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_USERNAME: retail
+      DB_PASSWORD: retail123
+      CATALOG_SERVICE_URL: http://catalog-service:8081
+      INVENTORY_SERVICE_URL: http://inventory-service:8082
+    ports:
+      - "8083:8083"
+    depends_on:
+      catalog-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+
+  report-service:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        SERVICE: report-service
+    environment:
+      DB_URL: jdbc:mysql://mysql:3306/retail_ops?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_USERNAME: retail
+      DB_PASSWORD: retail123
+    ports:
+      - "8084:8084"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        NEXT_PUBLIC_CATALOG_API: http://localhost:8081
+        NEXT_PUBLIC_INVENTORY_API: http://localhost:8082
+        NEXT_PUBLIC_POS_API: http://localhost:8083
+        NEXT_PUBLIC_REPORT_API: http://localhost:8084
+    environment:
+      NEXT_PUBLIC_CATALOG_API: http://localhost:8081
+      NEXT_PUBLIC_INVENTORY_API: http://localhost:8082
+      NEXT_PUBLIC_POS_API: http://localhost:8083
+      NEXT_PUBLIC_REPORT_API: http://localhost:8084
+    ports:
+      - "3000:3000"
+    depends_on:
+      catalog-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      pos-service:
+        condition: service_started
+      report-service:
+        condition: service_started
+
+volumes:
+  retailops_mysql:

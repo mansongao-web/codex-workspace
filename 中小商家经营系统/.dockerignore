@@ -1,0 +1,9 @@
+.git
+.agents
+.codex
+**/node_modules
+**/.next
+**/target
+**/.mvn/wrapper/maven-wrapper.jar
+*.log
+npm-debug.log*

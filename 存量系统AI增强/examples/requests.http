@@ -1,0 +1,49 @@
+### Health
+GET http://localhost:8080/health
+
+### Ingest document
+POST http://localhost:8080/api/documents
+Content-Type: application/json
+
+{
+  "title": "差旅报销制度",
+  "sourceUri": "oa://docs/finance/travel-policy",
+  "sourceType": "POLICY",
+  "department": "财务",
+  "category": "制度",
+  "tags": ["报销", "差旅", "财务"],
+  "content": "员工差旅报销需要提交审批单、发票和行程单。住宿费按照城市等级执行标准，超标部分需部门负责人审批。"
+}
+
+### Ingest FAQ
+POST http://localhost:8080/api/faqs
+Content-Type: application/json
+
+{
+  "question": "CRM 客户资料如何查询？",
+  "answer": "进入 CRM 客户中心，通过客户名称、手机号或企业统一社会信用代码检索。",
+  "sourceUri": "faq://crm/customer-search",
+  "department": "销售",
+  "category": "FAQ"
+}
+
+### Semantic search
+POST http://localhost:8080/api/search
+Content-Type: application/json
+
+{
+  "query": "住宿报销需要哪些材料",
+  "topK": 5,
+  "filters": {
+    "department": "财务"
+  }
+}
+
+### Ask with citations
+POST http://localhost:8080/api/ask
+Content-Type: application/json
+
+{
+  "question": "差旅住宿报销怎么处理？",
+  "topK": 5
+}

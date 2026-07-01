@@ -1,0 +1,23 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: pos-service
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/retail_ops?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai}
+    username: ${DB_USERNAME:retail}
+    password: ${DB_PASSWORD:retail123}
+  sql:
+    init:
+      mode: never
+
+services:
+  catalog-url: ${CATALOG_SERVICE_URL:http://localhost:8081}
+  inventory-url: ${INVENTORY_SERVICE_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
